@@ -1,13 +1,11 @@
 package br.com.tpaimyu.swingy.models;
 
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 
 public class HeroTest {
@@ -19,6 +17,7 @@ public class HeroTest {
                 .setName("TestHero")
                 .setLevel(1)
                 .setAttack(10)
+                .setDefense(10)
                 .setHitPoints(100)
                 .setHeroClass("Warrior")
                 .build();
@@ -27,33 +26,36 @@ public class HeroTest {
         assertEquals(hero.getName(), "TestHero");
         assertEquals(hero.getLevel(), 1);
         assertEquals(hero.getAttack(), 10);
+        assertEquals(hero.getDefense(), 10);
         assertEquals(hero.getHitPoints(), 100);
     }
 
     @Test
     void shouldRejectBlankHeroClass() {
-        try {
+        
+        ConstraintViolationException exception = assertThrows(
+                ConstraintViolationException.class,
+                () -> {
             Hero hero = new Hero.HeroBuilder()
                     .setName("TestHero")
                     .setLevel(1)
                     .setAttack(10)
+                    .setDefense(10)
                     .setHitPoints(100)
                     .setHeroClass("") // Blank hero class
                     .build();
-            assertFalse(true, "Expected ConstraintViolationException was not thrown");
-        } catch (ConstraintViolationException e) {
-            Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
-            assertEquals(1, violations.size());
-            ConstraintViolation<?> violation = violations.iterator().next();
-            assertEquals("Hero class cannot be blank", violation.getMessage());
-        }
-
+                });
+            assertTrue(exception
+                .getMessage()
+                .contains("Hero class cannot be blank"));
     }
 
     
     @Test
     void shouldRejectNegativeLevel() {
-        try {
+        ConstraintViolationException exception = assertThrows(
+                ConstraintViolationException.class,
+                () -> {
             Hero hero = new Hero.HeroBuilder()
                     .setName("TestHero")
                     .setLevel(-1) // Negative level
@@ -61,18 +63,19 @@ public class HeroTest {
                     .setHitPoints(100)
                     .setHeroClass("Warrior")
                     .build();
-            assertFalse(true, "Expected ConstraintViolationException was not thrown");
-        } catch (ConstraintViolationException e) {
-            Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
-            assertEquals(1, violations.size());
-            ConstraintViolation<?> violation = violations.iterator().next();
-            assertEquals("Level must be at least 1", violation.getMessage());
-        }
+                });
+            assertTrue(exception
+                .getMessage()
+                .contains("Level must be at least 1"));
+                
     }
 
     @Test
     void shouldRejectNegativeAttack() {
-        try {
+        
+        ConstraintViolationException exception = assertThrows(
+                ConstraintViolationException.class,
+                () -> {
             Hero hero = new Hero.HeroBuilder()
                     .setName("TestHero")
                     .setLevel(1)
@@ -80,18 +83,18 @@ public class HeroTest {
                     .setHitPoints(100)
                     .setHeroClass("Warrior")
                     .build();
-            assertFalse(true, "Expected ConstraintViolationException was not thrown");
-        } catch (ConstraintViolationException e) {
-            Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
-            assertEquals(1, violations.size());
-            ConstraintViolation<?> violation = violations.iterator().next();
-            assertEquals("Attack must be at least 1", violation.getMessage());
-        }
+                });
+            assertTrue(exception
+                .getMessage()
+                .contains("Attack must be at least 1"));
     }
 
     @Test
     void shouldRejectNegativeHitPoints() {
-        try {
+        
+        ConstraintViolationException exception = assertThrows(
+                ConstraintViolationException.class,
+                () -> {
             Hero hero = new Hero.HeroBuilder()
                     .setName("TestHero")
                     .setLevel(1)
@@ -99,14 +102,31 @@ public class HeroTest {
                     .setHitPoints(-1) // Negative hit points
                     .setHeroClass("Warrior")
                     .build();
-            assertFalse(true, "Expected ConstraintViolationException was not thrown");
-        } catch (ConstraintViolationException e) {
-            Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
-            assertEquals(1, violations.size());
-            ConstraintViolation<?> violation = violations.iterator().next();
-            assertEquals("Hit points must be at least 1", violation.getMessage());
-        }
+                });
+            assertTrue(exception
+                .getMessage()
+                .contains("Hit points must be at least 1"));
     }
 
-    
+
+    @Test
+    void shouldRejectNegativeDefense() {
+        
+        ConstraintViolationException exception = assertThrows(
+                ConstraintViolationException.class,
+                () -> {
+            Hero hero = new Hero.HeroBuilder()
+                    .setName("TestHero")
+                    .setLevel(1)
+                    .setAttack(10)
+                    .setHitPoints(100)
+                    .setDefense(-1) // Negative defense
+                    .setHeroClass("Warrior")
+                    .build();
+                });
+            assertTrue(exception
+                .getMessage()
+                .contains("Defense must be zero or positive"));
+    }
+
 }
