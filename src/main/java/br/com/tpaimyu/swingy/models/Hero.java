@@ -33,7 +33,9 @@ public class Hero extends Character {
 
         @Override
         public Hero build() {
-            return new Hero(this);
+            Hero hero = new Hero(this);
+            this.validate(hero);
+            return hero;
         }
     }
 
