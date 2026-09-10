@@ -22,6 +22,14 @@ public abstract class Character {
     @PositiveOrZero(message = "Defense must be zero or positive")
     protected int defense;
 
+    protected Character(Builder<?> builder) {
+        this.name = builder.name;
+        this.level = builder.level;
+        this.attack = builder.attack;
+        this.hitPoints = builder.hitPoints;
+        this.defense = builder.defense;
+    }
+
     public String getName() {
         return name;
     }
@@ -40,6 +48,18 @@ public abstract class Character {
 
     public int getDefense() {
         return defense;
+    }
+
+    public void takeDamage(int damage) {
+        this.hitPoints -= damage;
+        
+        if (this.hitPoints < 0) {
+            this.hitPoints = 0;
+        }
+    }
+
+    public boolean isDead() {
+        return this.hitPoints <= 0;
     }
 
     public abstract static class Builder<T extends Builder<T>> {

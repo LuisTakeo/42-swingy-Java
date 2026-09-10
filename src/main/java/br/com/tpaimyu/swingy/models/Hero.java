@@ -1,6 +1,8 @@
 package br.com.tpaimyu.swingy.models;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 public class Hero extends Character {
     @NotBlank(message = "Hero class cannot be blank")
@@ -9,17 +11,19 @@ public class Hero extends Character {
     private Artifact weapon;
     private Artifact armor;
     private Artifact helmet;
+    @PositiveOrZero(message = "Experience must be zero or positive")
+    private int experience;
+    @Positive(message = "Next level experience must be positive")
+    private int nextLevelExperience;
 
     private Hero(HeroBuilder builder) {
-        this.name = builder.name;
-        this.level = builder.level;
-        this.attack = builder.attack;
-        this.defense = builder.defense;
-        this.hitPoints = builder.hitPoints;
+        super(builder);
         this.heroClass = builder.heroClass;
         this.weapon = builder.weapon;
         this.armor = builder.armor;
         this.helmet = builder.helmet;
+        this.experience = 0;
+        this.nextLevelExperience = getRequiredXpForNextLevel();
     }
 
     public String getHeroClass() {
@@ -66,6 +70,28 @@ public class Hero extends Character {
         int bonus = (helmet != null) ? helmet.getBonus() : 0;
         return super.getHitPoints() + bonus;
     }
+
+    public void addExperience(int exp) {
+        this.experience += exp;
+        while (this.experience >= this.nextLevelExperience) {
+            this.levelUp();
+        }
+    }
+
+    @Positive(message = "Required experience for next level must be positive")
+    private int getRequiredXpForNextLevel() {
+        return (this.level * 1000) + (int)(Math.pow(this.level - 1, 2) * 450);
+    }
+
+    private void levelUp() {
+        this.level++;
+        this.attack += 5; 
+        this.defense += 5; 
+        this.hitPoints += 10; 
+        
+        this.nextLevelExperience = getRequiredXpForNextLevel();
+    }
+
 
     public static class HeroBuilder extends Character.Builder<HeroBuilder> {
         private String heroClass;

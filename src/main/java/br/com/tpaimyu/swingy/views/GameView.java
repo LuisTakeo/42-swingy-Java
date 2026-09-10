@@ -4,6 +4,7 @@ public interface GameView {
     void start();
     void showMessage(String message);
     String getUserInput();
-    void hide();
     void close();
+
+    void renderMap(char[][] mapGrid);
 }
