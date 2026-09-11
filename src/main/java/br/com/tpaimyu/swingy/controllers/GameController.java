@@ -1,6 +1,8 @@
 package br.com.tpaimyu.swingy.controllers;
 
 import br.com.tpaimyu.swingy.models.Hero;
+import br.com.tpaimyu.swingy.states.GameState;
+import br.com.tpaimyu.swingy.states.MenuState;
 import br.com.tpaimyu.swingy.views.ConsoleView;
 import br.com.tpaimyu.swingy.views.GameView;
 import br.com.tpaimyu.swingy.views.GuiView;
@@ -8,7 +10,7 @@ import br.com.tpaimyu.swingy.views.GuiView;
 public class GameController {
     private GameView view;
     private boolean isRunning;
-    private GameState currentState;
+    private GameState currentState; // Referência para o Estado Atual
     private int gameTurn;
 
     private Hero playerHero; 
@@ -16,14 +18,17 @@ public class GameController {
 
     public GameController(GameView view) {
         this.view = view;
-        this.isRunning = true; // Garante que o loop inicie
-        this.currentState = GameState.GAME_MENU; // O jogo sempre começa no menu
+        this.isRunning = true;
         this.mapController = new MapController();
+        this.currentState = new MenuState(); // O jogo começa no Menu
+    }
+
+    public void changeState(GameState newState) {
+        this.currentState = newState;
     }
 
     public void switchView() {
         this.view.close();
-
         this.view = this.view instanceof ConsoleView
                 ? new GuiView()
                 : new ConsoleView();
@@ -34,133 +39,34 @@ public class GameController {
         view.start();
 
         while (isRunning) {
-            // 1. RENDERIZA A TELA DEPENDENDO DO ESTADO
-            renderCurrentState();
+            // 1. Renderiza a tela do estado atual
+            currentState.render(this);
             
-            // 2. LÊ O INPUT
-            String input = view.getUserInput();
+            // 2. Lê o input do usuário
+            String input = view.getUserInput().trim().toLowerCase();
             
-            // 3. VAI PARA A VALIDAÇÃO CORRETA DEPENDENDO DO ESTADO
-            routeInput(input);
+            // 3. Comandos Globais
+            if (input.equals("exit")) {
+                this.isRunning = false;
+                continue;
+            }
+            if (input.equals("switch")) {
+                switchView();
+                continue;
+            }
+
+            // 4. Delega a lógica de input para o estado atual
+            currentState.handleInput(this, input);
         }
 
         view.showMessage("Obrigado por jogar Swingy!");
         view.close();
     }
 
-    // --- MÉTODOS DE ROTEAMENTO (O MAESTRO) ---
-
-    private void renderCurrentState() {
-        switch (currentState) {
-            case GAME_MENU:
-                renderMainMenu();
-                break;
-            case GAME_PLAYING_MAP:
-                renderMapState();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void routeInput(String input) {
-        String command = input.trim().toLowerCase();
-
-        if (handleGlobalCommand(command)) {
-            return;
-        }
-
-        switch (currentState) {
-            case GAME_MENU:
-                handleMenuInput(command);
-                break;
-            case GAME_PLAYING_MAP:
-                handleMapInput(command);
-                break;
-            default:
-                view.showMessage("Estado de jogo não suportado.");
-                break;
-        }
-    }
-
-    private boolean handleGlobalCommand(String command) {
-        switch (command) {
-            case "exit":
-                isRunning = false;
-                return true;
-            case "switch":
-                switchView();
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private void renderMainMenu() {
-        view.showMessage("\n--- MENU PRINCIPAL ---\n[1] Criar Herói\n[2] Carregar Herói\n[switch] Trocar Tela\n[exit] Sair");
-    }
-
-    private void renderMapState() {
-        gameTurn++;
-        view.showMessage("\n--- MAPA ---\nPara onde ir? (North, South, East, West)\n[switch] Trocar Tela\n[exit] Sair");
-    }
-
-    private void handleMenuInput(String command) {
-        switch (command) {
-            case "1":
-                createHeroAndStartGame();
-                break;
-            case "2":
-                loadHero();
-                break;
-            default:
-                view.showMessage("Comando inválido para o menu.");
-                break;
-        }
-    }
-
-    private void createHeroAndStartGame() {
-        view.showMessage("Iniciando criação de herói...");
-        playerHero = new HeroController().startHeroCreation(view);
-        mapController.initializeMap(playerHero.getLevel());
-        renderMap();
-        currentState = GameState.GAME_PLAYING_MAP;
-    }
-
-    private void loadHero() {
-        view.showMessage("Carregando jogo... (Em breve)");
-    }
-
-    private void handleMapInput(String command) {
-        if (!isMovementCommand(command)) {
-            view.showMessage("Direção inválida. Use north, south, east ou west.");
-            return;
-        }
-
-        boolean wonTheMap = mapController.moveHero(command);
-        renderMap();
-
-        if (wonTheMap) {
-            view.showMessage("\n🎉 PARABÉNS! Você chegou à borda do mapa e sobreviveu!");
-            currentState = GameState.GAME_MENU;
-            return;
-        }
-
-        view.showMessage("Você avançou para " + command + ".");
-        showHeroPosition();
-    }
-
-    private boolean isMovementCommand(String command) {
-        return command.equals("north") || command.equals("south")
-                || command.equals("east") || command.equals("west");
-    }
-
-    private void showHeroPosition() {
-        view.showMessage("Sua posição agora é: X=" + mapController.getHeroPosition().x()
-                + " | Y=" + mapController.getHeroPosition().y());
-    }
-
-    private void renderMap() {
-        view.renderMap(mapController.generateMapGrid());
-    }
+    // --- GETTERS E SETTERS ---
+    public GameView getView() { return view; }
+    public MapController getMapController() { return mapController; }
+    public Hero getPlayerHero() { return playerHero; }
+    public void setPlayerHero(Hero hero) { this.playerHero = hero; }
+    public void incrementTurn() { this.gameTurn++; }
 }
