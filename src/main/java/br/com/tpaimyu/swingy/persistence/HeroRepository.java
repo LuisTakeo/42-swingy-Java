@@ -6,11 +6,11 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Optional;
+import java.util.Properties;
 
 import br.com.tpaimyu.swingy.models.Artifact;
 import br.com.tpaimyu.swingy.models.ArtifactType;

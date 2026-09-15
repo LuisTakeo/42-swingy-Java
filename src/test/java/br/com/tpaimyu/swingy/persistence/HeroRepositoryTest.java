@@ -1,11 +1,10 @@
 package br.com.tpaimyu.swingy.persistence;
 
+import java.nio.file.Files;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.nio.file.Files;
-
 import org.junit.jupiter.api.Test;
 
 import br.com.tpaimyu.swingy.models.Artifact;
