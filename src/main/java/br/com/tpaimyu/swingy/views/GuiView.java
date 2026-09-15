@@ -55,13 +55,14 @@ public class GuiView extends JFrame implements GameView {
     private void setupWindow() {
         setTitle("Swingy");
         setSize(800, 800);
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent event) {
                 closeHandler.run();
                 inputQueue.offer("exit");
                 dispose();
+                System.exit(0);
             }
         });
         setLocationRelativeTo(null);

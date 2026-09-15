@@ -32,5 +32,6 @@ public class App {
         // 3. Injeta a View escolhida no Controller e roda o jogo!
         GameController gameController = new GameController(view);
         gameController.run();
+        System.exit(0);
     }
 }

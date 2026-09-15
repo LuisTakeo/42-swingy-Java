@@ -22,14 +22,14 @@ help:
 	@echo "\tmake run-db           Executa usando persistencia PostgreSQL"
 
 run: package
-	@if [ "$(MODE)" = "console" ] || [ "$(MODE)" = "gui" ]; then \
-		echo "Executando no modo $(MODE)..."; \
-		java -jar target/swingy-1.0-SNAPSHOT-jar-with-dependencies.jar $(MODE); \
-	else \
-		echo "Uso: make run MODE=console"; \
-		echo "  ou: make run MODE=gui"; \
-		exit 1; \
-	fi
+ifeq ($(filter console gui,$(MODE)),)
+	@echo "Uso: make run MODE=console"
+	@echo "  ou: make run MODE=gui"
+	@exit 1
+else
+	@echo "Executando no modo $(MODE)..."
+	java -jar target/swingy-1.0-SNAPSHOT-jar-with-dependencies.jar $(MODE)
+endif
 
 clean:
 	$(MVN) clean

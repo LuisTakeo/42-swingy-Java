@@ -16,7 +16,7 @@ import br.com.tpaimyu.swingy.views.GuiView;
 
 public class GameController {
     private GameView view;
-    private boolean isRunning;
+    private volatile boolean isRunning;
     private GameState currentState; // Referência para o Estado Atual
     private int gameTurn;
 
