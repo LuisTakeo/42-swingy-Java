@@ -1,13 +1,14 @@
 package br.com.tpaimyu.swingy.states;
 
 import br.com.tpaimyu.swingy.controllers.GameController;
+import br.com.tpaimyu.swingy.models.Villain;
 
 public class MapState implements GameState {
 
     @Override
     public void render(GameController context) {
         context.incrementTurn();
-        context.getView().showMessage("\n--- MAPA ---\nPara onde ir? (North, South, East, West)\n[switch] Trocar Tela\n[exit] Sair");
+        context.getView().showMessage("\n--- MAP ---\nWhere do you want to go? (North, South, East, West)\n[switch] Switch View\n[exit] Exit");
         
         // Desenha o Grid visual na GUI ou no Console
         context.getView().renderMap(context.getMapController().generateMapGrid());
@@ -19,20 +20,23 @@ public class MapState implements GameState {
             input.equals("east") || input.equals("west")) {
             
             boolean wonTheMap = context.getMapController().moveHero(input);
+                Villain encounteredVillain = context.getMapController().getEncounteredVillain();
 
             context.getView().renderMap(
                     context.getMapController().generateMapGrid()
             );
 
-            if (wonTheMap) {
+                if (encounteredVillain != null) {
+                    context.changeState(new BattleState(encounteredVillain));
+                } else if (wonTheMap) {
                 context.getView().showMessage(
-                        "\n🎉 PARABÉNS! Você chegou à borda do mapa e sobreviveu!"
+                        "\n🎉 CONGRATULATIONS! You reached the map edge and survived!"
                 );
-                context.changeState(new MenuState());
+                context.finishMapAndReturnToMenu();
             } else {
-                context.getView().showMessage("Você avançou para " + input + ".");
+                context.getView().showMessage("You moved " + input + ".");
                 context.getView().showMessage(
-                        "Sua posição agora é: X="
+                        "Your current position is: X="
                         + context.getMapController().getHeroPosition().x()
                         + " | Y="
                         + context.getMapController().getHeroPosition().y()
@@ -40,7 +44,7 @@ public class MapState implements GameState {
             }
                         
         } else {
-            context.getView().showMessage("Direção inválida. Use north, south, east ou west.");
+            context.getView().showMessage("Invalid direction. Use north, south, east or west.");
         }
     }
 }

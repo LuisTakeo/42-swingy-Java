@@ -22,7 +22,7 @@ public class Hero extends Character {
         this.weapon = builder.weapon;
         this.armor = builder.armor;
         this.helmet = builder.helmet;
-        this.experience = 0;
+        this.experience = builder.experience;
         this.nextLevelExperience = getRequiredXpForNextLevel();
     }
 
@@ -39,6 +39,22 @@ public class Hero extends Character {
 
     public Artifact getHelmet() {
         return helmet;
+    }
+
+    public int getExperience() {
+        return experience;
+    }
+
+    public int getBaseAttack() {
+        return attack;
+    }
+
+    public int getBaseDefense() {
+        return defense;
+    }
+
+    public int getBaseHitPoints() {
+        return hitPoints;
     }
 
     public void setWeapon(Artifact weapon) {
@@ -98,6 +114,7 @@ public class Hero extends Character {
         private Artifact weapon;
         private Artifact armor;
         private Artifact helmet;
+        private int experience;
 
         @Override
         protected HeroBuilder self() {
@@ -121,6 +138,11 @@ public class Hero extends Character {
 
         public HeroBuilder setHelmet(Artifact helmet) {
             this.helmet = helmet;
+            return self();
+        }
+
+        public HeroBuilder setExperience(int experience) {
+            this.experience = experience;
             return self();
         }
 

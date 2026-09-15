@@ -8,14 +8,14 @@ import jakarta.validation.ConstraintViolationException;
 public class HeroController {
 
     public Hero startHeroCreation(GameView view) {
-        view.showMessage("\n=== CRIAÇÃO DE HERÓI ===");
+        view.showMessage("\n=== HERO CREATION ===");
         
         while (true) {
             try {
-                view.showMessage("Digite o nome do seu Herói:");
+                view.showMessage("Enter your hero's name:");
                 String name = view.getUserInput().trim();
 
-                view.showMessage("Escolha a classe do Herói (ex: Warrior, Mage, Rogue):");
+                view.showMessage("Choose your hero's class (e.g. Warrior, Mage, Rogue):");
                 String heroClass = view.getUserInput().trim();
 
                 // Tentamos construir o herói. 
@@ -29,12 +29,12 @@ public class HeroController {
                         .setHitPoints(50)
                         .build();
 
-                view.showMessage("\n✅ Herói [" + hero.getName() + " - " + hero.getHeroClass() + "] criado com sucesso!");
+                view.showMessage("\n✅ Hero [" + hero.getName() + " - " + hero.getHeroClass() + "] created successfully!");
                 return hero; // Sai do loop e devolve o herói
 
             } catch (ConstraintViolationException e) {
                 // Se o Jakarta achar um erro (ex: nome em branco), ele cai aqui!
-                view.showMessage("\n❌ Erro na criação do herói. Verifique os dados:");
+                view.showMessage("\n❌ Hero creation failed. Check your data:");
                 
                 // Imprime as mensagens de erro que você configurou no modelo
                 for (ConstraintViolation<?> violation : e.getConstraintViolations()) {

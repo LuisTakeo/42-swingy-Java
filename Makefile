@@ -1,6 +1,12 @@
 MVN := mvn
 
-.PHONY: help clean compile test verify package install dependency-tree run
+ifeq ($(OS),Windows_NT)
+DB_ENV := set SWINGY_PERSISTENCE=db&&
+else
+DB_ENV := SWINGY_PERSISTENCE=db
+endif
+
+.PHONY: help clean compile test verify package install dependency-tree run db-up db-down run-db
 
 help:
 	@echo "Comandos disponíveis:"
@@ -11,11 +17,14 @@ help:
 	@echo "	make package         Gera o arquivo JAR"
 	@echo "	make install         Instala o JAR no repositorio local"
 	@echo "	make dependency-tree  Mostra as dependencias"
+	@echo "\tmake db-up            Inicia o PostgreSQL via Docker"
+	@echo "\tmake db-down          Para o PostgreSQL via Docker"
+	@echo "\tmake run-db           Executa usando persistencia PostgreSQL"
 
 run: package
 	@if [ "$(MODE)" = "console" ] || [ "$(MODE)" = "gui" ]; then \
 		echo "Executando no modo $(MODE)..."; \
-		java -jar target/swingy-1.0-SNAPSHOT.jar $(MODE); \
+		java -jar target/swingy-1.0-SNAPSHOT-jar-with-dependencies.jar $(MODE); \
 	else \
 		echo "Uso: make run MODE=console"; \
 		echo "  ou: make run MODE=gui"; \
@@ -42,3 +51,12 @@ install:
 
 dependency-tree:
 	$(MVN) dependency:tree
+
+db-up:
+	docker compose up -d
+
+db-down:
+	docker compose down
+
+run-db: package db-up
+	$(DB_ENV) java -jar target/swingy-1.0-SNAPSHOT-jar-with-dependencies.jar $(if $(MODE),$(MODE),console)

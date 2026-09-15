@@ -8,9 +8,5 @@ public record Coordinates(
     @PositiveOrZero (message = "Y coordinate must be zero or positive")
     int y
 ) {
-    public boolean equals(Coordinates other) {
-        return this.x == other.x 
-            && this.y == other.y;
-    }
 }
      

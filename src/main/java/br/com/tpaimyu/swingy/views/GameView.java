@@ -5,6 +5,7 @@ public interface GameView {
     void showMessage(String message);
     String getUserInput();
     void close();
+    default void setCloseHandler(Runnable closeHandler) { }
 
     void renderMap(char[][] mapGrid);
 }

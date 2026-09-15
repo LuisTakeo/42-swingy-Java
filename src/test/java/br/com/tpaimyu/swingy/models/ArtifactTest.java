@@ -24,6 +24,7 @@ public class ArtifactTest {
         assertEquals("Excalibur", artifact.getName());
     }
 
+    @Test
     public void testArtifactBuilder() {
         Artifact artifact = new Artifact.ArtifactBuilder()
                 .setType(ArtifactType.ARMOR)

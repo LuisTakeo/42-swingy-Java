@@ -10,14 +10,22 @@ import br.com.tpaimyu.swingy.views.GameView;
 
 public class BattleController {
 
-    private final Random random = new Random();
+    private final Random random;
+
+    public BattleController() {
+        this(new Random());
+    }
+
+    BattleController(Random random) {
+        this.random = random;
+    }
 
     // Método principal que o GameController chama
     public BattleResult startEncounter(GameView view, Hero hero, Villain villain) {
         view.showMessage("\n⚔️ Um " + villain.getName() + " hostil bloqueia seu caminho!");
         
         while (true) {
-            view.showMessage("\nO que você deseja fazer?\n[1] Lutar (Fight)\n[2] Fugir (Run)");
+            view.showMessage("\nWhat do you want to do?\n[1] Fight\n[2] Run");
             String choice = view.getUserInput().trim();
 
             if (choice.equals("1")) {
@@ -32,47 +40,55 @@ public class BattleController {
                 }
             } 
             else {
-                view.showMessage("Comando inválido na tensão da batalha!");
+                view.showMessage("Invalid battle command!");
             }
         }
     }
 
+    public BattleResult fight(GameView view, Hero hero, Villain villain) {
+        return executeBattle(view, hero, villain);
+    }
+
+    public boolean tryToEscape(GameView view) {
+        return tryToRun(view);
+    }
+
     // --- REGRA DE FUGA (50% de chance) ---
     private boolean tryToRun(GameView view) {
-        view.showMessage("Você tenta correr...");
+        view.showMessage("You try to run...");
         boolean success = random.nextBoolean(); // Retorna true ou false (50/50)
         
         if (success) {
-            view.showMessage("🏃 Você conseguiu escapar por pouco!");
+            view.showMessage("🏃 You barely escaped!");
             return true;
         } else {
-            view.showMessage("❌ O monstro bloqueou sua rota de fuga! Prepare-se!");
+            view.showMessage("❌ The monster blocked your escape! Get ready!");
             return false;
         }
     }
 
     private BattleResult executeBattle(GameView view, Hero hero, Villain villain) {
-        view.showMessage("\n--- INÍCIO DA BATALHA ---");
+        view.showMessage("\n--- BATTLE START ---");
 
         while (hero.getHitPoints() > 0 && villain.getHitPoints() > 0) {
             
             int heroDmg = this.calculateDamage(
                 hero.getAttack(), villain.getDefense());
             villain.takeDamage(heroDmg);
-            view.showMessage("Você atacou causando " + heroDmg + " de dano! (Monstro: " + villain.getHitPoints() + " HP)");
+            view.showMessage("You attacked for " + heroDmg + " damage! (Monster: " + villain.getHitPoints() + " HP)");
 
             if (villain.getHitPoints() <= 0) break; 
 
             int villainDmg = calculateDamage(villain.getAttack(), hero.getDefense());
             hero.takeDamage(villainDmg); // Precisa ter esse método no Character!
-            view.showMessage("O " + villain.getName() + " revidou causando " + villainDmg + " de dano! (Seu HP: " + hero.getHitPoints() + ")");
+            view.showMessage("The " + villain.getName() + " struck back for " + villainDmg + " damage! (Your HP: " + hero.getHitPoints() + ")");
         }
 
         // Verifica quem ficou de pé
         if (hero.getHitPoints() > 0) {
             return handleVictory(view, hero, villain);
         } else {
-            view.showMessage("\n☠️ Você foi derrotado na batalha...");
+            view.showMessage("\n☠️ You were defeated in battle...");
             return BattleResult.DEFEAT;
         }
     }
@@ -85,11 +101,17 @@ public class BattleController {
     }
 
     private BattleResult handleVictory(GameView view, Hero hero, Villain villain) {
-        view.showMessage("\n🏆 VITÓRIA! O monstro caiu.");
+        view.showMessage("\n🏆 VICTORY! The monster fell.");
         
         int xpGained = villain.getLevel() * 500;
-        view.showMessage("Você ganhou " + xpGained + " XP!");
+        view.showMessage("You gained " + xpGained + " XP!");
+        int previousLevel = hero.getLevel();
         hero.addExperience(xpGained);
+
+        if (hero.getLevel() > previousLevel) {
+            view.showMessage("\nLEVEL UP! You reached level " + hero.getLevel() + "!");
+            showHeroStats(view, hero);
+        }
 
         if (random.nextInt(100) < 40) {
             Artifact loot = ArtifactFactory.generateLoot(villain.getLevel());
@@ -99,10 +121,19 @@ public class BattleController {
         return BattleResult.VICTORY;
     }
 
+    private void showHeroStats(GameView view, Hero hero) {
+        view.showMessage("Current status:"
+            + "\nLevel: " + hero.getLevel()
+                + "\nXP: " + hero.getExperience()
+                + "\nAtaque: " + hero.getAttack()
+                + "\nDefesa: " + hero.getDefense()
+                + "\nHP: " + hero.getHitPoints());
+    }
+
     private void handleLootDrop(GameView view, Hero hero, Artifact loot) {
-        view.showMessage("\n✨ O monstro deixou cair um item!");
+        view.showMessage("\n✨ The monster dropped an item!");
         view.showMessage("Item: " + loot.getName() + " (+ " + loot.getBonus() + " " + loot.getType() + ")");
-        view.showMessage("Deseja equipar este item? [Y/N]");
+        view.showMessage("Equip this item? [Y/N]");
 
         while (true) {
             String input = view.getUserInput().trim().toLowerCase();
@@ -112,10 +143,10 @@ public class BattleController {
                     case ARMOR: hero.setArmor(loot); break;
                     case HELMET: hero.setHelmet(loot); break;
                 }
-                view.showMessage("Item equipado com sucesso!");
+                view.showMessage("Item equipped successfully!");
                 break;
             } else if (input.equals("n")) {
-                view.showMessage("Você deixou o item no chão.");
+                view.showMessage("You left the item on the ground.");
                 break;
             }
         }

@@ -10,6 +10,8 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -43,6 +45,7 @@ public class GuiView extends JFrame implements GameView {
     private int renderedMapSize;
     private JLabel[][] mapCells;
     private char[][] lastMapGrid;
+    private Runnable closeHandler = () -> { };
 
     public GuiView() {
         this.inputQueue = new LinkedBlockingQueue<>();
@@ -52,7 +55,15 @@ public class GuiView extends JFrame implements GameView {
     private void setupWindow() {
         setTitle("Swingy");
         setSize(800, 800);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent event) {
+                closeHandler.run();
+                inputQueue.offer("exit");
+                dispose();
+            }
+        });
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
@@ -100,7 +111,10 @@ public class GuiView extends JFrame implements GameView {
         int size = mapGrid.length;
         int cellSize = 64;
 
-        if (mapCells != null && mapCells.length == size) {
+        if (mapCells != null
+            && lastMapGrid != null
+            && mapCells.length == size
+            && mapPanel.getComponentCount() == size * size) {
             updateChangedCells(mapGrid, cellSize);
             return;
         }
@@ -247,16 +261,30 @@ public class GuiView extends JFrame implements GameView {
         dispose();
     }
 
+    @Override
+    public void setCloseHandler(Runnable closeHandler) {
+        this.closeHandler = closeHandler == null ? () -> { } : closeHandler;
+    }
+
     private void updateButtonsBasedOnContext(String message) {
-        if (message.contains("MENU PRINCIPAL")) {
+        if (message.contains("MAIN MENU")) {
             mapInputEnabled = false;
             renderMainMenu();
         } 
-        else if (message.contains("MAPA")) {
+        else if (message.contains("MAP")) {
             mapInputEnabled = true;
             renderMapControls();
         }
-        else if (message.contains("Digite") || message.contains("Escolha")) {
+        else if (message.contains("[1] Fight")
+            || message.contains("Choose 1 to fight")) {
+            mapInputEnabled = false;
+            renderBattleControls();
+        }
+        else if (message.contains("Equip this item?")) {
+            mapInputEnabled = false;
+            renderLootControls();
+        }
+        else if (message.contains("Enter") || message.contains("Choose")) {
             mapInputEnabled = false;
             renderTextInput();
         }
@@ -269,14 +297,17 @@ public class GuiView extends JFrame implements GameView {
         // APAGA O MAPA FANTASMA QUANDO VOLTA PRO MENU
         if (mapPanel != null) {
             mapPanel.removeAll();
+            mapCells = null;
+            lastMapGrid = null;
+            renderedMapSize = 0;
             mapPanel.revalidate();
             mapPanel.repaint();
         }
         
-        addButton("Criar Herói", "1");
-        addButton("Carregar Herói", "2");
-        addButton("Trocar Tela", "switch");
-        addButton("Sair", "exit");
+        addButton("Create Hero", "1");
+        addButton("Load Hero", "2");
+        addButton("Switch View", "switch");
+        addButton("Exit", "exit");
         
         refreshPanel();
     }
@@ -286,15 +317,35 @@ public class GuiView extends JFrame implements GameView {
         buttonPanel.setLayout(new GridLayout(2, 4));
         
         buttonPanel.add(new JLabel(""));
-        addButton("Norte", "north");
+        addButton("North", "north");
         buttonPanel.add(new JLabel(""));
-        addButton("Trocar Tela", "switch");
+        addButton("Switch View", "switch");
         
-        addButton("Oeste", "west");
-        addButton("Sul", "south");
-        addButton("Leste", "east");
-        addButton("Sair", "exit");
+        addButton("West", "west");
+        addButton("South", "south");
+        addButton("East", "east");
+        addButton("Exit", "exit");
         
+        refreshPanel();
+    }
+
+    private void renderBattleControls() {
+        buttonPanel.removeAll();
+        buttonPanel.setLayout(new FlowLayout());
+
+        addButton("Fight", "1");
+        addButton("Run", "2");
+
+        refreshPanel();
+    }
+
+    private void renderLootControls() {
+        buttonPanel.removeAll();
+        buttonPanel.setLayout(new FlowLayout());
+
+        addButton("Equipar", "y");
+        addButton("Ignorar", "n");
+
         refreshPanel();
     }
 

@@ -6,7 +6,7 @@ public class MenuState implements GameState {
 
     @Override
     public void render(GameController context) {
-        context.getView().showMessage("\n--- MENU PRINCIPAL ---\n[1] Criar Herói\n[2] Carregar Herói\n[switch] Trocar Tela\n[exit] Sair");
+        context.getView().showMessage("\n--- MAIN MENU ---\n[1] Create Hero\n[2] Load Hero\n[switch] Switch View\n[exit] Exit");
     }
 
     @Override
@@ -16,10 +16,10 @@ public class MenuState implements GameState {
                 context.changeState(new HeroCreationState()); // Vai para a tela de criação
                 break;
             case "2":
-                context.getView().showMessage("Carregando jogo... (Em breve)");
+                context.openHeroLoadState();
                 break;
             default:
-                context.getView().showMessage("Comando inválido para o menu.");
+                context.getView().showMessage("Invalid menu command.");
                 break;
         }
     }

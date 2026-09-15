@@ -12,10 +12,10 @@ public class HeroCreationState implements GameState {
     @Override
     public void render(GameController context) {
         if (heroName == null) {
-            context.getView().showMessage("\n=== CRIAÇÃO DE HERÓI ===");
-            context.getView().showMessage("Digite o nome do seu Herói:");
+            context.getView().showMessage("\n=== HERO CREATION ===");
+            context.getView().showMessage("Enter your hero's name:");
         } else {
-            context.getView().showMessage("Escolha a classe do Herói (ex: Warrior, Mage, Rogue):");
+            context.getView().showMessage("Choose your hero's class (e.g. Warrior, Mage, Rogue):");
         }
     }
 
@@ -40,17 +40,18 @@ public class HeroCreationState implements GameState {
                     .setHitPoints(50)
                     .build();
 
-            context.getView().showMessage("\n✅ Herói [" + hero.getName() + " - " + hero.getHeroClass() + "] criado com sucesso!");
+            context.getView().showMessage("\n✅ Hero [" + hero.getName() + " - " + hero.getHeroClass() + "] created successfully!");
             
             // Salva no Maestro e prepara o mapa
             context.setPlayerHero(hero);
             context.getMapController().initializeMap(hero.getLevel());
+            context.saveHero();
             
             // Vai para o Mapa!
             context.changeState(new MapState());
 
         } catch (ConstraintViolationException e) {
-            context.getView().showMessage("\n❌ Erro na criação do herói:");
+            context.getView().showMessage("\n❌ Hero creation failed:");
             for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
                 context.getView().showMessage(" - " + violation.getMessage());
             }

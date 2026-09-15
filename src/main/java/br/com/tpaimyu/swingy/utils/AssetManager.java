@@ -39,7 +39,7 @@ public class AssetManager {
         if (url != null) {
             return new ImageIcon(url);
         }
-        System.err.println("Imagem não encontrada: " + path);
+        System.err.println("Image not found: " + path);
         return null; 
     }
 }
